@@ -11,8 +11,8 @@ router.post('/posts', extractUserId, (req, res) => postController.createPost(req
 // Get posts by user IDs (used by feed service)
 router.get('/posts', (req, res) => postController.getPosts(req, res));
 
-// Get all posts (for testing)
-router.get('/posts/all', (req, res) => postController.getAllPosts(req, res));
+// Get posts by specific user ID
+router.get('/posts/user/:userId', (req, res) => postController.getPostsByUserId(req, res));
 
 // Get a specific post by ID
 router.get('/posts/:id', (req, res) => postController.getPostById(req, res));

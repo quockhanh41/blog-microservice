@@ -8,7 +8,6 @@ export class FeedController {
   constructor() {
     this.feedService = new FeedService();
   }
-
   async getFeed(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.userId;
@@ -20,8 +19,12 @@ export class FeedController {
       // Get optional limit parameter
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       
+      // Extract token from Authorization header
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
+      
       // Get the feed
-      const feed = await this.feedService.getUserFeed(userId, limit);
+      const feed = await this.feedService.getUserFeed(userId, limit, token);
       
       res.status(200).json(feed);
     } catch (error) {

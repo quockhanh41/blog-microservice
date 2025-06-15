@@ -35,10 +35,10 @@ process.on('SIGINT', async () => {
 app.listen(PORT, async () => {
   console.log(`Post service running on port ${PORT}`);
   
-  // Connect to Kafka for event listening
-  try {
-    await kafkaService.connect();
-  } catch (error) {
+  // Connect to Kafka for event listening (non-blocking)
+  // This will retry in the background if Kafka is not available
+  kafkaService.connect().catch(error => {
     console.error('Failed to connect to Kafka:', error);
-  }
+    console.log('Post service will continue running without Kafka consumer');
+  });
 });

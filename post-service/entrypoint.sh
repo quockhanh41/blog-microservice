@@ -19,5 +19,9 @@ npm run db:init
 
 echo "Database initialization completed. Starting the application..."
 
+# Run database seeding
+npm run db:seed
+echo "Database seeding completed."
+
 # Start the application
 exec npm start

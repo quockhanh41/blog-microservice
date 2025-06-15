@@ -32,7 +32,8 @@ export class PostServiceClient {
           if (user_ids && Array.isArray(user_ids)) {
             user_ids.forEach(id => serialized.append('user_ids', id));
           }
-          
+          console.log(`Serialized params: ${serialized.toString()}`);
+          // Return the serialized string
           return serialized.toString();
         }
       });

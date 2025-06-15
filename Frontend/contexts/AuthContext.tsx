@@ -41,9 +41,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = await import("@/lib/api").then(module => module.authApi.getProfile())
       setUser(userData)
+      // Đảm bảo userId được lưu trong localStorage
+      if (userData.id) {
+        localStorage.setItem("userId", userData.id)
+      }
     } catch (error) {
       console.error("Error fetching user profile:", error)
       localStorage.removeItem("token")
+      localStorage.removeItem("userId")
     } finally {
       setLoading(false)
     }
@@ -52,7 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const data = await import("@/lib/api").then(module => module.authApi.login(email, password))
+      // Lưu token và user.id vào localStorage
       localStorage.setItem("token", data.token)
+      localStorage.setItem("userId", data.user.id)
       setUser(data.user)
       toast({
         title: "Đăng nhập thành công",
@@ -72,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (username: string, email: string, password: string) => {
     try {
       const data = await import("@/lib/api").then(module => module.authApi.register(username, email, password))
+      // Lưu token và user.id vào localStorage
       localStorage.setItem("token", data.token)
+      localStorage.setItem("userId", data.user.id)
       setUser(data.user)
       toast({
         title: "Đăng ký thành công",
@@ -90,7 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    // Xóa token và userId khỏi localStorage
     localStorage.removeItem("token")
+    localStorage.removeItem("userId")
     setUser(null)
     toast({
       title: "Đăng xuất thành công",

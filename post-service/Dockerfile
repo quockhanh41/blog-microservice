@@ -22,6 +22,9 @@ COPY src ./src/
 COPY scripts ./scripts/
 COPY entrypoint.sh ./
 
+# Build TypeScript
+RUN npm run build
+
 # Make entrypoint script executable
 RUN chmod +x /app/entrypoint.sh
 

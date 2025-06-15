@@ -11,20 +11,32 @@ export class UserServiceClient {
   constructor() {
     this.baseUrl = process.env.USER_SERVICE_URL || 'http://localhost:3001';
   }
-
-  async getFollowingUsers(userId: string): Promise<string[]> {
+  async getFollowingUsers(userId: string, authToken?: string): Promise<string[]> {
     try {
-      const response = await axios.get(`${this.baseUrl}/users/${userId}/following`);
+      const headers: any = {};
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+      }
+      
+      const response = await axios.get(`${this.baseUrl}/users/${userId}/following`, {
+        headers
+      });
       return response.data.map((user: User) => user.id);
     } catch (error) {
       console.error('Error fetching following users:', error);
       throw new Error('Failed to fetch following users');
     }
   }
-
-  async getUserById(userId: string): Promise<User> {
+  async getUserById(userId: string, authToken?: string): Promise<User> {
     try {
-      const response = await axios.get(`${this.baseUrl}/users/${userId}`);
+      const headers: any = {};
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+      }
+      
+      const response = await axios.get(`${this.baseUrl}/users/${userId}`, {
+        headers
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching user:', error);

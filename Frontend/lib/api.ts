@@ -11,6 +11,14 @@ const getToken = (): string | null => {
   return null;
 };
 
+// Helper function to get the user ID
+const getUserId = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("userId");
+  }
+  return null;
+};
+
 // Helper function to handle API responses
 const handleResponse = async (response: Response) => {
   const data = await response.json();
@@ -26,9 +34,11 @@ const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const token = getToken();
+  const userId = getUserId();
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(userId ? { "x-user-id": userId } : {}),
     ...options.headers,
   };
 
@@ -193,3 +203,6 @@ const api = {
 };
 
 export default api;
+
+// Export helper functions
+export { getToken, getUserId };

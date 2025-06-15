@@ -12,8 +12,7 @@ export class FeedService {
     this.postServiceClient = new PostServiceClient();
     this.redisService = new RedisService();
   }
-
-  async getUserFeed(userId: string, limit: number = 50): Promise<Post[]> {
+  async getUserFeed(userId: string, limit: number = 50, authToken?: string): Promise<Post[]> {
     try {
       // Try to get from cache first
       const cachedFeed = await this.redisService.getFeed(userId);
@@ -26,7 +25,7 @@ export class FeedService {
       console.log(`Generating new feed for user ${userId}`);
       
       // Get list of users that the current user follows
-      const followingUserIds = await this.userServiceClient.getFollowingUsers(userId);
+      const followingUserIds = await this.userServiceClient.getFollowingUsers(userId, authToken);
       
       // Add the user's own posts to the feed (showing their own posts in their feed)
       const userIdsForFeed = [...followingUserIds, userId];

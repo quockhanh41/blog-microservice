@@ -165,8 +165,13 @@ export const followUser = async (req: Request, res: Response) => {
     await userService.followUser(userId, targetUserId);
 
     res.status(200).json({ message: 'Successfully followed user' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Follow user error:', error);
+
+    if (error instanceof Error && error.message === 'Already following this user') {
+      return res.status(400).json({ error: 'Already following this user' });
+    }
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };

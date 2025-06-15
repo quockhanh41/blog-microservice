@@ -167,6 +167,10 @@ export const followUser = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Successfully followed user' });
   } catch (error) {
     console.error('Follow user error:', error);
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'Already following this user') {
+      return res.status(400).json({ error: message });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -309,5 +309,46 @@ describe('User Controller Integration Tests', () => {
         'Forbidden: You can only manage your own follow relationships'
       );
     });
+
+    it('should return 400 when already following the user', async () => {
+      const mockFollower = {
+        id: 'user-1',
+        username: 'user1',
+        email: 'user1@example.com',
+        password_hash: 'hash',
+        created_at: new Date(),
+      };
+
+      const mockFollowed = {
+        id: 'user-2',
+        username: 'user2',
+        email: 'user2@example.com',
+        password_hash: 'hash',
+        created_at: new Date(),
+      };
+
+      mockPrisma.user.findUnique
+        .mockResolvedValueOnce(mockFollower)
+        .mockResolvedValueOnce(mockFollowed);
+
+      mockPrisma.follow.findFirst.mockResolvedValue({
+        id: 'existing-follow',
+        follower_id: 'user-1',
+        followed_id: 'user-2',
+        followed_at: new Date(),
+      });
+
+      const token = jwt.sign({ id: 'user-1', username: 'user1' }, 'test-secret');
+
+      const response = await request(app)
+        .post('/users/user-1/follow')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          targetUserId: 'user-2',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Already following this user');
+    });
   });
 });

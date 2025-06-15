@@ -16,7 +16,10 @@ if ! npx prisma migrate deploy 2>/dev/null; then
   npx prisma migrate deploy
 fi
 
-echo "Migrations completed. Starting the application..."
+echo "Migrations completed. Initializing database..."
+npm run init-db
+
+echo "Starting the application..."
 
 # Start the application
 exec npm start

@@ -122,8 +122,10 @@ See [API_SPEC.md](API_SPEC.md) for detailed API documentation.
 | `PORT` | Server port | `3002` |
 | `DATABASE_URL` | PostgreSQL connection string | - |
 | `USER_SERVICE_URL` | User service base URL | `http://localhost:3001` |
-| `KAFKA_BROKER` | Kafka broker address | `localhost:9092` |
+| `KAFKA_BROKERS` | Kafka broker addresses (comma-separated) | `localhost:9092` |
 | `NODE_ENV` | Environment mode | `development` |
+
+`KAFKA_BROKERS` can contain a comma-separated list of broker addresses.
 
 ## Database Schema
 
@@ -189,7 +191,7 @@ The service consumes the following Kafka events:
 
 2. **Kafka Connection Issues:**
    - Verify Kafka broker is running
-   - Check KAFKA_BROKER environment variable
+   - Check KAFKA_BROKERS environment variable
    - Ensure topic 'user.updated' exists
 
 3. **User Service Communication:**

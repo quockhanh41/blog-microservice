@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@postgres-user:5432/user_service
+      - DATABASE_URL=postgresql://postgres@postgres-user:5432/user_service
       - KAFKA_BROKERS=kafka:9092
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=3001
@@ -80,7 +80,7 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@postgres-post:5432/post_service
+      - DATABASE_URL=postgresql://postgres@postgres-post:5432/post_service
       - USER_SERVICE_URL=http://user-service:3001
       - KAFKA_BROKERS=kafka:9092
       - PORT=3002
@@ -133,12 +133,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_USER=postgres
       - POSTGRES_DB=user_service
       - POSTGRES_MULTIPLE_DATABASES=user_service,user_service_test
     volumes:
-      - pgdata-user:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -155,12 +154,11 @@ services:
     ports:
       - "5433:5432"
     environment:
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_USER=postgres
       - POSTGRES_DB=post_service
       - POSTGRES_MULTIPLE_DATABASES=post_service,post_service_test
     volumes:
-      - pgdata-post:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -176,8 +174,6 @@ services:
     container_name: blog-redis
     ports:
       - "6379:6379"
-    volumes:
-      - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -195,6 +191,10 @@ services:
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
+      - ZOOKEEPER_SERVER_ID=1
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "2181"]
       interval: 10s
@@ -209,14 +209,20 @@ services:
     container_name: blog-kafka
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_LOG_RETENTION_MS=300000
+      - KAFKA_LOG_SEGMENT_MS=60000
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -229,11 +235,11 @@ services:
       - blog-network
     restart: unless-stopped
 
-volumes:
-  pgdata-user:
-  pgdata-post:
-  redisdata:
-
 networks:
   blog-network:
     driver: bridge
+
+volumes:
+  zookeeper-data:
+  zookeeper-log:
+  kafka-data:

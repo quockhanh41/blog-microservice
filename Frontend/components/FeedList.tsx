@@ -29,22 +29,14 @@ export default function FeedList() {
 
   const fetchPosts = async (pageNum = 1) => {
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8080/api/posts/feed?page=${pageNum}&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (pageNum === 1) {
-          setPosts(data.posts)
-        } else {
-          setPosts((prev) => [...prev, ...data.posts])
-        }
-        setHasMore(data.hasMore)
+      const { feedApi } = await import("@/lib/api")
+      const data = await feedApi.getFeed({ page: pageNum, limit: 10 })
+      if (pageNum === 1) {
+        setPosts(data.posts)
+      } else {
+        setPosts((prev) => [...prev, ...data.posts])
       }
+      setHasMore(data.hasMore)
     } catch (error) {
       console.error("Error fetching posts:", error)
     } finally {

@@ -33,6 +33,7 @@ healthApp.listen(HEALTH_PORT, () => {
   console.log(`Health check server started on port ${HEALTH_PORT}`);
 });
 
+
 // Start the gateway (this will start the Express Gateway based on your config)
 gateway()
   .load(path.join(__dirname, 'config'))

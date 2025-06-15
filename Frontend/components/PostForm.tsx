@@ -25,25 +25,13 @@ export default function PostForm() {
     setLoading(true)
 
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch("http://localhost:8080/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+      const { postApi } = await import("@/lib/api")
+      await postApi.createPost(formData)
+      toast({
+        title: "Đăng bài thành công",
+        description: "Bài viết của bạn đã được đăng tải!",
       })
-
-      if (response.ok) {
-        toast({
-          title: "Đăng bài thành công",
-          description: "Bài viết của bạn đã được đăng tải!",
-        })
-        router.push("/")
-      } else {
-        throw new Error("Không thể đăng bài")
-      }
+      router.push("/")
     } catch (error) {
       toast({
         title: "Lỗi đăng bài",

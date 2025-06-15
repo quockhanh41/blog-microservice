@@ -10,8 +10,6 @@ apiEndpoints:
     paths: '/posts/*'
   feed:
     paths: '/feed/*'
-  auth:
-    paths: '/auth/*'
 serviceEndpoints:
   userService:
     url: 'http://user-service:3001'
@@ -20,94 +18,32 @@ serviceEndpoints:
   feedService:
     url: 'http://feed-service:3003'
 policies:
-  - cors
-  - jwt
   - proxy
-  - rate-limit
-  - log
 pipelines:
   users:
     apiEndpoints:
       - users
     policies:
-      - cors:
-          action:
-            origin: '*'
-            methods: 'GET,POST,PUT,DELETE'
-            allowedHeaders: 'Content-Type,Authorization'
-            preflightContinue: false
-      - jwt:
-          action:
-            secretOrPublicKey: 'your-super-secret-jwt-key-change-in-production'
-            checkCredentialExistence: false
       - proxy:
           action:
             serviceEndpoint: userService
             changeOrigin: true
-            stripPath: false
-      - log:
-          action:
-            message: '${req.method} ${req.originalUrl}'  posts:
+            stripPath: true
+  posts:
     apiEndpoints:
       - posts
     policies:
-      - cors:
-          action:
-            origin: '*'
-            methods: 'GET,POST,PUT,DELETE'
-            allowedHeaders: 'Content-Type,Authorization'
-            preflightContinue: false
-      - jwt:
-          action:
-            secretOrPublicKey: 'your-super-secret-jwt-key-change-in-production'
-            checkCredentialExistence: false
-            passThrough: true
       - proxy:
           action:
             serviceEndpoint: postService
             changeOrigin: true
-            stripPath: false
-      - log:
-          action:
-            message: '${req.method} ${req.originalUrl}'
+            stripPath: true
   feed:
     apiEndpoints:
       - feed
     policies:
-      - cors:
-          action:
-            origin: '*'
-            methods: 'GET,POST,PUT,DELETE'
-            allowedHeaders: 'Content-Type,Authorization'
-            preflightContinue: false
-      - jwt:
-          action:
-            secretOrPublicKey: 'your-super-secret-jwt-key-change-in-production'
-            checkCredentialExistence: false
-            passThrough: true
       - proxy:
           action:
             serviceEndpoint: feedService
             changeOrigin: true
-            stripPath: false
-      - log:
-          action:
-            message: '${req.method} ${req.originalUrl}'
-  auth:
-    apiEndpoints:
-      - auth
-    policies:
-      - cors:
-          action:
-            origin: '*'
-            methods: 'GET,POST,PUT,DELETE'
-            allowedHeaders: 'Content-Type,Authorization'
-            preflightContinue: false
-      - proxy:
-          action:
-            serviceEndpoint: userService
-            changeOrigin: true
-            stripPath: false
-      - log:
-          action:
-            message: '${req.method} ${req.originalUrl}'
+            stripPath: true

@@ -15,32 +15,33 @@ export class KafkaService {
     this.consumer = this.kafka.consumer({ groupId: 'post-service-group' });
     this.postService = postService;
   }
-
   async connect(): Promise<void> {
     try {
       await this.consumer.connect();
-      await this.consumer.subscribe({ topic: 'user.updated' });
+      await this.consumer.subscribe({ topic: 'user-events' });
       
       await this.consumer.run({
         eachMessage: this.handleMessage.bind(this),
       });
       
-      console.log('Kafka consumer connected and listening for user.updated events');
+      console.log('Kafka consumer connected and listening for user-events');
     } catch (error) {
       console.error('Error connecting to Kafka:', error);
     }
   }
-
   private async handleMessage({ message }: { message: KafkaMessage }): Promise<void> {
     try {
       if (!message.value) return;
       
       const event: UserUpdatedEvent = JSON.parse(message.value.toString());
-      console.log('Received user.updated event:', event);
+      console.log('Received user event:', event);
       
-      await this.postService.updateUserReference(event.user_id, event.username);
+      // Only process user.updated events
+      if (event.eventType === 'user.updated') {
+        await this.postService.updateUserReference(event.id, event.username);
+      }
     } catch (error) {
-      console.error('Error processing user.updated event:', error);
+      console.error('Error processing user event:', error);
     }
   }
 

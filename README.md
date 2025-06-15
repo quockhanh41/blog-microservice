@@ -47,6 +47,41 @@ The system follows these architectural principles:
 
 3. The API Gateway will be available at http://localhost:8080
 
+### 🔄 Running with Fresh Data (No Persistence)
+
+This project is configured to **NOT persist data** between container restarts. Every time you start the containers, all data (databases, Redis cache, Kafka messages) will be reset.
+
+**Option 1: Using PowerShell script**
+```powershell
+.\reset-and-start.ps1
+```
+
+**Option 2: Using Batch script**
+```batch
+reset-and-start.bat
+```
+
+**Option 3: Manual commands**
+```bash
+# Stop and remove all containers with volumes
+docker-compose down --volumes --remove-orphans
+
+# Clean up Docker system
+docker system prune -f
+
+# Remove any remaining volumes
+docker volume prune -f
+
+# Start fresh containers
+docker-compose up --build --force-recreate
+```
+
+**Note**: 
+- PostgreSQL databases will be empty on each startup
+- Redis cache will be cleared
+- Kafka topics and messages will be reset
+- All user accounts, posts, and follows will need to be recreated
+
 ## Service Endpoints
 
 ### User Service

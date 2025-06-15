@@ -25,8 +25,9 @@ export interface GetPostsQuery {
 }
 
 export interface UserUpdatedEvent {
-  user_id: string;
+  id: string;
   username: string;
+  eventType: 'user.created' | 'user.updated';
   timestamp: string;
 }
 

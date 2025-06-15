@@ -30,21 +30,19 @@ export default function UserCard({ user, showFollowButton = true }: UserCardProp
   const handleFollow = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8080/api/users/${user.id}/follow`, {
-        method: isFollowing ? "DELETE" : "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        setIsFollowing(!isFollowing)
-        toast({
-          title: isFollowing ? "Đã bỏ theo dõi" : "Đã theo dõi",
-          description: `${isFollowing ? "Bỏ theo dõi" : "Theo dõi"} ${user.username} thành công`,
-        })
+      const { userApi } = await import("@/lib/api")
+      
+      if (isFollowing) {
+        await userApi.unfollowUser(user.id)
+      } else {
+        await userApi.followUser(user.id)
       }
+      
+      setIsFollowing(!isFollowing)
+      toast({
+        title: isFollowing ? "Đã bỏ theo dõi" : "Đã theo dõi",
+        description: `${isFollowing ? "Bỏ theo dõi" : "Theo dõi"} ${user.username} thành công`,
+      })
     } catch (error) {
       toast({
         title: "Lỗi",

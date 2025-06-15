@@ -39,18 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const userData = await response.json()
-        setUser(userData)
-      } else {
-        localStorage.removeItem("token")
-      }
+      const userData = await import("@/lib/api").then(module => module.authApi.getProfile())
+      setUser(userData)
     } catch (error) {
       console.error("Error fetching user profile:", error)
       localStorage.removeItem("token")
@@ -61,27 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const data = await import("@/lib/api").then(module => module.authApi.login(email, password))
+      localStorage.setItem("token", data.token)
+      setUser(data.user)
+      toast({
+        title: "Đăng nhập thành công",
+        description: "Chào mừng bạn trở lại!",
       })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token)
-        setUser(data.user)
-        toast({
-          title: "Đăng nhập thành công",
-          description: "Chào mừng bạn trở lại!",
-        })
-        router.push("/")
-      } else {
-        throw new Error(data.message || "Đăng nhập thất bại")
-      }
+      router.push("/")
     } catch (error) {
       toast({
         title: "Lỗi đăng nhập",
@@ -94,27 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (username: string, email: string, password: string) => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password }),
+      const data = await import("@/lib/api").then(module => module.authApi.register(username, email, password))
+      localStorage.setItem("token", data.token)
+      setUser(data.user)
+      toast({
+        title: "Đăng ký thành công",
+        description: "Chào mừng bạn đến với blog!",
       })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token)
-        setUser(data.user)
-        toast({
-          title: "Đăng ký thành công",
-          description: "Chào mừng bạn đến với blog!",
-        })
-        router.push("/")
-      } else {
-        throw new Error(data.message || "Đăng ký thất bại")
-      }
+      router.push("/")
     } catch (error) {
       toast({
         title: "Lỗi đăng ký",

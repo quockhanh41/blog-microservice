@@ -30,13 +30,8 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const handleLike = async () => {
     try {
-      const token = localStorage.getItem("token")
-      await fetch(`http://localhost:8080/api/posts/${post.id}/like`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const { postApi } = await import("@/lib/api")
+      await postApi.likePost(post.id)
       // Refresh the post data or update state
     } catch (error) {
       console.error("Error liking post:", error)

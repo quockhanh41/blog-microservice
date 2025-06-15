@@ -1,5 +1,6 @@
 const express = require('express');
 const gateway = require('express-gateway');
+const path = require('path');
 
 // Try to load morgan, but continue if not available
 let morgan;
@@ -33,5 +34,12 @@ healthApp.listen(HEALTH_PORT, () => {
 });
 
 // Start the gateway (this will start the Express Gateway based on your config)
-const gatewayApp = gateway();
-console.log('API Gateway server started successfully');
+gateway()
+  .load(path.join(__dirname, 'config'))
+  .run()
+  .then(() => {
+    console.log('API Gateway server started successfully');
+  })
+  .catch(err => {
+    console.error('Failed to start API Gateway:', err);
+  });

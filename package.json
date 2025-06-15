@@ -1,0 +1,17 @@
+{
+  "name": "blog-microservices",
+  "version": "1.0.0",
+  "description": "Blog system built with microservices architecture",
+  "main": "index.js",
+  "scripts": {
+    "start": "docker-compose up",
+    "build": "docker-compose build",
+    "dev": "docker-compose up -d"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.4"
+  }
+}

@@ -1,0 +1,51 @@
+# ===== LỆNH TRUY VẤN DATABASE POSTGRES USER SERVICE =====
+
+# 1. Kết nối vào PostgreSQL container của user service
+docker exec -it blog-postgres-user psql -U postgres -d user_service
+
+# 2. Kết nối với password (nếu cần)
+docker exec -it blog-postgres-user psql -U postgres -d user_service -W
+
+# 3. Thực hiện lệnh SQL trực tiếp từ command line
+docker exec -it blog-postgres-user psql -U postgres -d user_service -c "SELECT * FROM users LIMIT 10;"
+
+# 4. Xem danh sách tất cả tables
+docker exec -it blog-postgres-user psql -U postgres -d user_service -c "\dt"
+
+# 5. Xem cấu trúc của table users
+docker exec -it blog-postgres-user psql -U postgres -d user_service -c "\d users"
+
+# 6. Đếm số lượng users
+docker exec -it blog-postgres-user psql -U postgres -d user_service -c "SELECT COUNT(*) FROM users;"
+
+# 7. Xem thông tin database
+docker exec -it blog-postgres-user psql -U postgres -d user_service -c "\l"
+
+# 8. Kết nối từ host machine (cần có psql client)
+psql -h localhost -p 5432 -U postgres -d user_service
+
+# 9. Backup database
+docker exec blog-postgres-user pg_dump -U postgres user_service > user_service_backup.sql
+
+# 10. Restore database
+docker exec -i blog-postgres-user psql -U postgres user_service < user_service_backup.sql
+
+# ===== CÁC LỆNH SQL THƯỜNG DÙNG =====
+
+# Xem tất cả users:
+# SELECT * FROM users;
+
+# Tìm user theo email:
+# SELECT * FROM users WHERE email = 'example@email.com';
+
+# Tạo user mới:
+# INSERT INTO users (username, email, password_hash) VALUES ('testuser', 'test@email.com', 'hashedpassword');
+
+# Cập nhật thông tin user:
+# UPDATE users SET username = 'newusername' WHERE id = 1;
+
+# Xóa user:
+# DELETE FROM users WHERE id = 1;
+
+# Xem schema của database:
+# SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';

@@ -1,0 +1,25 @@
+# system.config.yml
+
+# plugins to load
+plugins:
+  # Load custom plugins from local directory
+  cors:
+    package: './plugins/cors.js'
+  rate-limit:
+    package: './plugins/rate-limit.js'
+  log:
+    package: './plugins/log.js'
+  gateway-info:
+    package: './plugins/gateway-info.js'
+
+# gateway config
+db:
+  redis:
+    host: redis
+    port: 6379
+    # namespace: EG
+
+crypto:
+  cipherKey: your-super-secret-jwt-key-change-in-production
+  algorithm: aes256
+  saltRounds: 10

@@ -57,6 +57,20 @@ export class UserService {
     return follows.map(follow => follow.followed);
   }
 
+  async getAllUsers(): Promise<{ id: string; username: string }[]> {
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        username: true
+      },
+      orderBy: {
+        username: 'asc'
+      }
+    });
+
+    return users;
+  }
+
   async followUser(followerId: string, followedId: string): Promise<void> {
     // Check if already following
     const existingFollow = await this.prisma.follow.findFirst({
@@ -74,6 +88,26 @@ export class UserService {
       data: {
         follower_id: followerId,
         followed_id: followedId
+      }
+    });
+  }
+
+  async unfollowUser(followerId: string, followedId: string): Promise<void> {
+    // Check if currently following
+    const existingFollow = await this.prisma.follow.findFirst({
+      where: {
+        follower_id: followerId,
+        followed_id: followedId
+      }
+    });
+
+    if (!existingFollow) {
+      throw new Error('Not following this user');
+    }
+
+    await this.prisma.follow.delete({
+      where: {
+        id: existingFollow.id
       }
     });
   }

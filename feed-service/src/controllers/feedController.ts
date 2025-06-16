@@ -7,8 +7,7 @@ export class FeedController {
 
   constructor() {
     this.feedService = new FeedService();
-  }
-  async getFeed(req: AuthenticatedRequest, res: Response): Promise<void> {
+  }  async getFeed(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.userId;
       if (!userId) {
@@ -16,17 +15,18 @@ export class FeedController {
         return;
       }
 
-      // Get optional limit parameter
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      // Get optional limit and page parameters
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
       
       // Extract token from Authorization header
       const authHeader = req.headers.authorization;
       const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined;
       
       // Get the feed
-      const feed = await this.feedService.getUserFeed(userId, limit, token);
+      const feedResult = await this.feedService.getUserFeed(userId, limit, token, page);
       
-      res.status(200).json(feed);
+      res.status(200).json(feedResult);
     } catch (error) {
       console.error('Error fetching feed:', error);
       res.status(500).json({ error: 'Failed to fetch feed' });

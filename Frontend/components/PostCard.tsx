@@ -38,23 +38,49 @@ export default function PostCard({ post }: PostCardProps) {
     }
   }
 
+  // Defensive check for author data
+  const author = post.author || { id: 'unknown', username: 'Unknown User' };
+  const authorAvatar = author.avatar || "/placeholder.svg";
+  const authorUsername = author.username || "Unknown User";
+  const authorId = author.id || 'unknown';
+
   return (
     <Card className="w-full transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={post.author.avatar || "/placeholder.svg"} alt={post.author.username} />
-            <AvatarFallback>{post.author.username.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={authorAvatar} alt={authorUsername} />
+            <AvatarFallback>{authorUsername.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <Link href={`/profile/${post.author.id}`} className="font-semibold hover:underline">
-              {post.author.username}
+            <Link href={`/profile/${authorId}`} className="font-semibold hover:underline">
+              {authorUsername}
             </Link>
             <p className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(post.createdAt), {
-                addSuffix: true,
-                locale: vi,
-              })}
+              {(() => {
+                try {
+                  // Debug: log the createdAt value
+                  console.log('PostCard createdAt:', post.createdAt, typeof post.createdAt);
+                  
+                  if (!post.createdAt) {
+                    return "Thời gian không xác định";
+                  }
+                  
+                  const date = new Date(post.createdAt);
+                  if (isNaN(date.getTime())) {
+                    console.error('Invalid date in PostCard:', post.createdAt);
+                    return "Thời gian không xác định";
+                  }
+                  
+                  return formatDistanceToNow(date, {
+                    addSuffix: true,
+                    locale: vi,
+                  });
+                } catch (error) {
+                  console.error('Error formatting date in PostCard:', error, post.createdAt);
+                  return "Thời gian không xác định";
+                }
+              })()}
             </p>
           </div>
         </div>

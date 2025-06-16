@@ -1,7 +1,9 @@
 # system.config.yml
 
 # plugins to load
-plugins: {}
+plugins:
+  cors:
+    package: '@express-gateway/cors'
 
 # gateway config
 db:

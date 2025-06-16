@@ -97,7 +97,30 @@ Base URL: `http://localhost:3001`
 
 ---
 
-## 4. Get Following Users
+## 4. Get All Users
+**GET** `/users`
+
+### Response (200 OK):
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "username": "john_doe"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "username": "alice_smith"
+  },
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440002",
+    "username": "bob_jones"
+  }
+]
+```
+
+---
+
+## 5. Get Following Users
 **GET** `/users/{id}/following`
 
 ### Headers:
@@ -131,7 +154,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 5. Follow User
+## 6. Follow User
 **POST** `/users/{id}/follow`
 
 ### Headers:
@@ -181,7 +204,64 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 6. Health Check
+## 7. Unfollow User
+**DELETE** `/users/{id}/unfollow`
+
+### Headers:
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+### Path Parameters:
+- `id`: Follower's User UUID (must match JWT token user ID)
+
+### Request Body:
+```json
+{
+  "targetUserId": "660e8400-e29b-41d4-a716-446655440001"
+}
+```
+
+### Response (200 OK):
+```json
+{
+  "message": "Successfully unfollowed user"
+}
+```
+
+### Error Responses:
+
+**400 Bad Request** (Not following user):
+```json
+{
+  "error": "Not following this user"
+}
+```
+
+**400 Bad Request** (Unfollowing yourself):
+```json
+{
+  "error": "You cannot unfollow yourself"
+}
+```
+
+**403 Forbidden** (Wrong user):
+```json
+{
+  "error": "Forbidden: You can only manage your own follow relationships"
+}
+```
+
+**404 Not Found** (User not found):
+```json
+{
+  "error": "User not found"
+}
+```
+
+---
+
+## 8. Health Check
 **GET** `/health`
 
 ### Response (200 OK):
@@ -238,6 +318,81 @@ User service is running
 3. **Get user profile**
    - Method: GET
    - URL: `{{base_url}}/users/{{user_id}}`
+   - Test Script:
+   ```javascript
+   pm.test("Status code is 200", function () {
+       pm.response.to.have.status(200);
+   });
+
+   pm.test("Response has required user fields", function () {
+       const response = pm.response.json();
+       pm.expect(response).to.have.property("id");
+       pm.expect(response).to.have.property("username");
+   });
+
+   pm.test("User ID matches requested ID", function () {
+       const response = pm.response.json();
+       pm.expect(response.id).to.equal(pm.environment.get("user_id"));
+   });
+
+   pm.test("Username is a string", function () {
+       const response = pm.response.json();
+       pm.expect(response.username).to.be.a("string");
+   });
+   ```
+
+3a. **Get all users**
+   - Method: GET
+   - URL: `{{base_url}}/users`
+   - Test Script:
+   ```javascript
+   pm.test("Status code is 200", function () {
+       pm.response.to.have.status(200);
+   });
+
+   pm.test("Response is an array", function () {
+       const response = pm.response.json();
+       pm.expect(response).to.be.an("array");
+   });
+
+   pm.test("Users array is not empty", function () {
+       const response = pm.response.json();
+       pm.expect(response.length).to.be.greaterThan(0);
+   });
+
+   pm.test("Each user has required fields", function () {
+       const response = pm.response.json();
+       response.forEach(user => {
+           pm.expect(user).to.have.property("id");
+           pm.expect(user).to.have.property("username");
+           pm.expect(user.id).to.be.a("string");
+           pm.expect(user.username).to.be.a("string");
+       });
+   });
+
+   pm.test("Users are sorted by username", function () {
+       const response = pm.response.json();
+       if (response.length > 1) {
+           for (let i = 1; i < response.length; i++) {
+               pm.expect(response[i].username >= response[i-1].username).to.be.true;
+           }
+       }
+   });
+
+   pm.test("Registered users are included in the list", function () {
+       const response = pm.response.json();
+       const currentUserId = pm.environment.get("user_id");
+       const targetUserId = pm.environment.get("target_user_id");
+       
+       const currentUser = response.find(user => user.id === currentUserId);
+       const targetUser = response.find(user => user.id === targetUserId);
+       
+       pm.expect(currentUser).to.not.be.undefined;
+       if (targetUserId) {
+           pm.expect(targetUser).to.not.be.undefined;
+       }
+   });
+   ```
 
 4. **Register second user for follow test**
    - Method: POST
@@ -290,6 +445,22 @@ User service is running
    - Method: GET
    - URL: `{{base_url}}/users/{{user_id}}/following`
    - (Don't include Authorization header)
+   - Test Script:
+   ```javascript
+   pm.test("Status code is 401", function () {
+       pm.response.to.have.status(401);
+   });
+
+   pm.test("Response has error message", function () {
+       const response = pm.response.json();
+       pm.expect(response).to.have.property("error");
+   });
+
+   pm.test("Error message indicates authorization issue", function () {
+       const response = pm.response.json();
+       pm.expect(response.error).to.include("Authorization");
+   });
+   ```
 
 9. **Test following yourself**
    - Method: POST
@@ -301,6 +472,103 @@ User service is running
      "targetUserId": "{{user_id}}"
    }
    ```
+   - Test Script:
+   ```javascript
+   pm.test("Status code is 400", function () {
+       pm.response.to.have.status(400);
+   });
+
+   pm.test("Response has error message", function () {
+       const response = pm.response.json();
+       pm.expect(response).to.have.property("error");
+   });
+
+   pm.test("Error message prevents self-following", function () {
+       const response = pm.response.json();
+       pm.expect(response.error).to.equal("You cannot follow yourself");
+   });
+   ```
+
+10. **Test unfollowing user not followed**
+    - Method: DELETE
+    - URL: `{{base_url}}/users/{{user_id}}/unfollow`
+    - Headers: `Authorization: Bearer {{jwt_token}}`
+    - Body (raw JSON):
+    ```json
+    {
+      "targetUserId": "{{target_user_id}}"
+    }
+    ```
+    - Test Script:
+    ```javascript
+    pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+    });
+
+    pm.test("Response has error message", function () {
+        const response = pm.response.json();
+        pm.expect(response).to.have.property("error");
+    });
+
+    pm.test("Error message indicates not following", function () {
+        const response = pm.response.json();
+        pm.expect(response.error).to.equal("Not following this user");
+    });
+    ```
+
+11. **Test unfollowing yourself**
+    - Method: DELETE
+    - URL: `{{base_url}}/users/{{user_id}}/unfollow`
+    - Headers: `Authorization: Bearer {{jwt_token}}`
+    - Body (raw JSON):
+    ```json
+    {
+      "targetUserId": "{{user_id}}"
+    }
+    ```
+    - Test Script:
+    ```javascript
+    pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+    });
+
+    pm.test("Response has error message", function () {
+        const response = pm.response.json();
+        pm.expect(response).to.have.property("error");
+    });
+
+    pm.test("Error message prevents self-unfollowing", function () {
+        const response = pm.response.json();
+        pm.expect(response.error).to.equal("You cannot unfollow yourself");
+    });
+    ```
+
+12. **Test successful unfollow after following**
+    - Method: DELETE
+    - URL: `{{base_url}}/users/{{user_id}}/unfollow`
+    - Headers: `Authorization: Bearer {{jwt_token}}`
+    - Body (raw JSON):
+    ```json
+    {
+      "targetUserId": "{{target_user_id}}"
+    }
+    ```
+    - Test Script:
+    ```javascript
+    pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    pm.test("Response has success message", function () {
+        const response = pm.response.json();
+        pm.expect(response).to.have.property("message");
+    });
+
+    pm.test("Unfollow success message is correct", function () {
+        const response = pm.response.json();
+        pm.expect(response.message).to.equal("Successfully unfollowed user");
+    });
+    ```
 
 ## Pre-request Script for Authentication
 For requests that need authentication, add this to Pre-request Script:

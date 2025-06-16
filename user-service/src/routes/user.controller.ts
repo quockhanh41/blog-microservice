@@ -115,6 +115,17 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+// Get all users
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Get following users
 export const getFollowingUsers = async (req: Request, res: Response) => {
   try {
@@ -172,6 +183,107 @@ export const followUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: message });
     }
 
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Unfollow a user
+export const unfollowUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // follower_id
+    console.log('Unfollow user request:', req.body);
+    const { targetUserId } = req.body; // followed_id
+    const userId = (req as any).user.id; // from JWT
+
+    // Ensure the authenticated user is the one trying to unfollow
+    if (id !== userId) {
+      return res.status(403).json({ error: 'Forbidden: You can only manage your own follow relationships' });
+    }
+
+    // Basic validation
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'Target user ID is required' });
+    }
+
+    // Check if both users exist
+    const follower = await userService.findUserById(userId);
+    const followed = await userService.findUserById(targetUserId);
+
+    console.log('Follower:', follower);
+    console.log('Followed:', followed);
+    if (!follower || !followed) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Prevent unfollowing yourself (though this shouldn't be possible)
+    if (userId === targetUserId) {
+      return res.status(400).json({ error: 'You cannot unfollow yourself' });
+    }
+
+    // Remove follow relationship
+    await userService.unfollowUser(userId, targetUserId);
+
+    res.status(200).json({ message: 'Successfully unfollowed user' });
+  } catch (error: any) {
+    console.error('Unfollow user error:', error);
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'Not following this user') {
+      return res.status(400).json({ error: message });
+    }
+
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Get user profile (authenticated user's own profile)
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id; // from JWT
+
+    const user = await userService.findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Return user profile information
+    res.status(200).json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      created_at: user.created_at
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Update user profile
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id; // from JWT
+    const { username } = req.body;
+
+    // Find existing user
+    const existingUser = await userService.findUserById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user profile (only username for now)
+    const updatedUser = await userService.updateUser(userId, { username });
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        created_at: updatedUser.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -92,25 +92,25 @@ export const authApi = {
 // Post API endpoints
 export const postApi = {
   createPost: (postData: { title: string; content: string }) => {
-    return apiRequest<any>("/posts", {
+    return apiRequest<any>("/posts/posts", {
       method: "POST",
       body: JSON.stringify(postData),
     });
   },
 
   getPost: (postId: string) => {
-    return apiRequest<any>(`/posts/${postId}`);
+    return apiRequest<any>(`/posts/posts/${postId}`);
   },
 
   updatePost: (postId: string, postData: { title: string; content: string }) => {
-    return apiRequest<any>(`/posts/${postId}`, {
+    return apiRequest<any>(`/posts/posts/${postId}`, {
       method: "PUT",
       body: JSON.stringify(postData),
     });
   },
 
   deletePost: (postId: string) => {
-    return apiRequest<any>(`/posts/${postId}`, {
+    return apiRequest<any>(`/posts/posts/${postId}`, {
       method: "DELETE",
     });
   },
@@ -129,18 +129,18 @@ export const postApi = {
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.sort) queryParams.append("sort", params.sort);
     queryParams.append("user_ids", userId);
-    
-    return apiRequest<any[]>(`/posts?${queryParams.toString()}`);
+
+    return apiRequest<any[]>(`/posts/posts?${queryParams.toString()}`);
   },
 
   likePost: (postId: string) => {
-    return apiRequest<any>(`/posts/${postId}/like`, {
+    return apiRequest<any>(`/posts/posts/${postId}/like`, {
       method: "POST",
     });
   },
 
   unlikePost: (postId: string) => {
-    return apiRequest<any>(`/posts/${postId}/unlike`, {
+    return apiRequest<any>(`/posts/posts/${postId}/unlike`, {
       method: "POST",
     });
   },
@@ -153,7 +153,7 @@ export const feedApi = {
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.page) queryParams.append("page", params.page.toString());
     
-    return apiRequest<{ posts: any[]; hasMore: boolean }>(`/feed?${queryParams.toString()}`);
+    return apiRequest<{ posts: any[]; hasMore: boolean }>(`/feed/feed?${queryParams.toString()}`);
   },
 
   invalidateCache: () => {
@@ -166,26 +166,26 @@ export const feedApi = {
 // User API endpoints
 export const userApi = {
   getUser: (userId: string) => {
-    return apiRequest<any>(`/users/${userId}`);
+    return apiRequest<any>(`/users/users/${userId}`);
   },
 
   getFollowing: (userId: string) => {
-    return apiRequest<string[]>(`/users/${userId}/following`);
+    return apiRequest<string[]>(`/users/users/${userId}/following`);
   },
 
   getFollowers: (userId: string) => {
-    return apiRequest<string[]>(`/users/${userId}/followers`);
+    return apiRequest<string[]>(`/users/users/${userId}/followers`);
   },
 
   followUser: (userId: string) => {
-    return apiRequest<{ message: string }>(`/users/${userId}/follow`, {
+    return apiRequest<{ message: string }>(`/users/users/${userId}/follow`, {
       method: "POST",
     });
   },
 
   unfollowUser: (userId: string) => {
-    return apiRequest<{ message: string }>(`/users/${userId}/unfollow`, {
-      method: "POST",
+    return apiRequest<{ message: string }>(`/users/users/${userId}/unfollow`, {
+      method: "DELETE",
     });
   },
 

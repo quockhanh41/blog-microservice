@@ -30,15 +30,30 @@ export default function FeedList() {
   const fetchPosts = async (pageNum = 1) => {
     try {
       const { feedApi } = await import("@/lib/api")
-      const data = await feedApi.getFeed({ page: pageNum, limit: 10 })
-      if (pageNum === 1) {
-        setPosts(data.posts)
+      const data = await feedApi.getFeed({ page: pageNum, limit: 5 })
+      
+      // Ensure data and data.posts exist
+      if (data && Array.isArray(data.posts)) {
+        if (pageNum === 1) {
+          setPosts(data.posts)
+        } else {
+          setPosts((prev) => [...prev, ...data.posts])
+        }
+        setHasMore(data.hasMore || false)
       } else {
-        setPosts((prev) => [...prev, ...data.posts])
+        // If data is invalid, set empty array for first page
+        if (pageNum === 1) {
+          setPosts([])
+        }
+        setHasMore(false)
       }
-      setHasMore(data.hasMore)
     } catch (error) {
       console.error("Error fetching posts:", error)
+      // On error, ensure posts is set to empty array for first page
+      if (pageNum === 1) {
+        setPosts([])
+      }
+      setHasMore(false)
     } finally {
       setLoading(false)
       setLoadingMore(false)
@@ -64,7 +79,7 @@ export default function FeedList() {
     )
   }
 
-  if (posts.length === 0) {
+  if (!posts || posts.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Chưa có bài viết nào trong feed của bạn.</p>

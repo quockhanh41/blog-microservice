@@ -121,9 +121,9 @@ const createConsulProxyMiddleware = (serviceName, pathPrefix) => {
           console.error(`❌ No healthy instances found for ${serviceName}`);
           // Fallback to localhost URLs for development mode
           const fallbackUrls = {
-            "user-service": "http://localhost:3001",
-            "post-service": "http://localhost:3002",
-            "feed-service": "http://localhost:3003",
+            "user-service": "http://user-service:3001",
+            "post-service": "http://post-service:3002",
+            "feed-service": "http://feed-service:3003",
           };
           return fallbackUrls[serviceName] || null;
         }

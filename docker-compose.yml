@@ -270,6 +270,34 @@
       - blog-network
     restart: unless-stopped
 
+  frontend:
+    build: 
+      context: ./Frontend
+      dockerfile: Dockerfile.dev
+    container_name: blog-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Frontend:/app:delegated
+      - /app/node_modules
+      - /app/.next
+      - /app/.pnpm-store
+    depends_on:
+      - api-gateway
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"] 
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 networks:
   blog-network:
     driver: bridge

@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 6060",
+    "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 6060",
+    "start": "node .next/standalone/server.js",
+    "start:legacy": "next start -p 3000",
     "lint": "next lint"
   },
   "dependencies": {

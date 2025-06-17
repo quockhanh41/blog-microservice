@@ -2,16 +2,45 @@
   "name": "blog-microservices",
   "version": "1.0.0",
   "description": "Blog system built with microservices architecture",
-  "main": "index.js",
-  "scripts": {
+  "main": "index.js",  "scripts": {
     "start": "docker-compose up",
     "build": "docker-compose build",
-    "dev": "docker-compose up -d"
+    "dev": "docker-compose up -d",
+    "pm2:install": "npm install -g pm2",
+    "pm2:build": "npm run build:all",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:start:backend": "pm2 start ecosystem.config.js --only api-gateway,user-service,post-service,feed-service",
+    "pm2:start:frontend": "pm2 start ecosystem.config.js --only frontend",
+    "pm2:start:frontend-dev": "pm2 start ecosystem.frontend.config.js --only frontend-dev",
+    "pm2:test:frontend": "powershell -ExecutionPolicy Bypass -File test-frontend-pm2.ps1",
+    "pm2:stop": "pm2 stop all",
+    "pm2:restart": "pm2 restart all",
+    "pm2:reload": "pm2 reload all",
+    "pm2:delete": "pm2 delete all",
+    "pm2:logs": "pm2 logs",    "pm2:logs:api": "pm2 logs api-gateway",
+    "pm2:logs:user": "pm2 logs user-service",
+    "pm2:logs:post": "pm2 logs post-service",
+    "pm2:logs:feed": "pm2 logs feed-service",
+    "pm2:logs:frontend": "pm2 logs frontend",
+    "pm2:monit": "pm2 monit",
+    "pm2:list": "pm2 list",
+    "pm2:save": "pm2 save",
+    "pm2:startup": "pm2 startup",
+    "infra:start": "docker-compose -f docker-compose.infrastructure.yml up -d",
+    "infra:stop": "docker-compose -f docker-compose.infrastructure.yml down",
+    "infra:logs": "docker-compose -f docker-compose.infrastructure.yml logs -f",
+    "infra:status": "docker-compose -f docker-compose.infrastructure.yml ps",    
+    "build:all": "npm run build:api && npm run build:user && npm run build:post && npm run build:feed && npm run build:frontend",
+    "build:api": "cd api-gateway && npm install",
+    "build:user": "cd user-service && npm run build",
+    "build:post": "cd post-service && npm run build",
+    "build:feed": "cd feed-service && npm run build",
+    "build:frontend": "cd Frontend && npm run build"
   },
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
+  "license": "ISC",  "devDependencies": {
     "@types/node": "^18.15.11",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "pm2": "^5.3.0"
   }
 }

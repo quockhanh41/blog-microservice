@@ -1,6 +1,4 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   api-gateway:
     build: 
       context: ./api-gateway
@@ -17,9 +15,13 @@ services:
       - user-service
       - post-service
       - feed-service
+      - consul
     environment:
       - NODE_ENV=development
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - SERVICE_ADDRESS=api-gateway
     restart: unless-stopped
     networks:
       - blog-network
@@ -34,9 +36,8 @@ services:
     build: 
       context: ./user-service
       dockerfile: Dockerfile
-    container_name: blog-user-service
     ports:
-      - "3001:3001"
+      - "3001-3010:3001"
     volumes:
       - ./user-service:/app
       - /app/node_modules
@@ -45,12 +46,17 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres@postgres-user:5432/user_service
       - KAFKA_BROKERS=kafka:9092
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - PORT=3001
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - SERVICE_ADDRESS=user-service
     restart: unless-stopped
     networks:
       - blog-network
@@ -65,9 +71,8 @@ services:
     build: 
       context: ./post-service
       dockerfile: Dockerfile
-    container_name: blog-post-service
     ports:
-      - "3002:3002"
+      - "3002-3020:3002"
     volumes:
       - ./post-service:/app
       - /app/node_modules
@@ -78,12 +83,17 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres@postgres-post:5432/post_service
       - USER_SERVICE_URL=http://user-service:3001
       - KAFKA_BROKERS=kafka:9092
       - PORT=3002
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - SERVICE_ADDRESS=post-service
     restart: unless-stopped
     networks:
       - blog-network
@@ -98,9 +108,8 @@ services:
     build: 
       context: ./feed-service
       dockerfile: Dockerfile
-    container_name: blog-feed-service
     ports:
-      - "3003:3003"
+      - "3003-3030:3003"
     volumes:
       - ./feed-service:/app
       - /app/node_modules
@@ -111,12 +120,17 @@ services:
         condition: service_healthy
       post-service:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
       - USER_SERVICE_URL=http://user-service:3001
       - POST_SERVICE_URL=http://post-service:3002
       - PORT=3003
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - SERVICE_ADDRESS=feed-service
     restart: unless-stopped
     networks:
       - blog-network
@@ -183,6 +197,27 @@ services:
       - blog-network
     restart: unless-stopped
 
+  consul:
+    image: consul:1.15
+    container_name: blog-consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    command: "consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1 -data-dir=/consul/data"
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    volumes:
+      - consul-data:/consul/data
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blog-network
+    restart: unless-stopped
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: blog-zookeeper
@@ -243,3 +278,4 @@ volumes:
   zookeeper-data:
   zookeeper-log:
   kafka-data:
+  consul-data:

@@ -20,11 +20,11 @@ apiEndpoints:
 
 serviceEndpoints:
   userService:
-    url: 'http://localhost:3001'
+    url: 'http://user-service:3001'
   postService:
-    url: 'http://localhost:3002'
+    url: 'http://post-service:3002'
   feedService:
-    url: 'http://localhost:3003'
+    url: 'http://feed-service:3003'
 
 policies:
   - proxy

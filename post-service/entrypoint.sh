@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # Make sure TypeScript is compiled
 echo "Building TypeScript code..."
 npm run build

@@ -66,7 +66,6 @@
       timeout: 5s
       retries: 3
       start_period: 10s
-
   post-service:
     build: 
       context: ./post-service
@@ -74,8 +73,11 @@
     ports:
       - "3002-3020:3002"
     volumes:
-      - ./post-service:/app
+      - ./post-service/src:/app/src
+      - ./post-service/scripts:/app/scripts
+      - ./post-service/prisma:/app/prisma
       - /app/node_modules
+      - /app/dist
     depends_on:
       postgres-post:
         condition: service_healthy

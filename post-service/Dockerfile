@@ -4,7 +4,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install curl for health check and openssl for Prisma
-RUN apk add --no-cache curl openssl
+RUN apk add --no-cache curl openssl dos2unix
 
 # Copy package files and prisma schema
 COPY package*.json ./
@@ -22,11 +22,11 @@ COPY src ./src/
 COPY scripts ./scripts/
 COPY entrypoint.sh ./
 
-# Build TypeScript
-RUN npm run build
+# Convert entrypoint script to Unix format and make it executable
+RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-# Make entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
+# Build TypeScript
+RUN npm run build && ls -la dist/
 
 # Expose port
 EXPOSE 3002
@@ -36,4 +36,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3002/health || exit 1
 
 # Use entrypoint script
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]

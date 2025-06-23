@@ -50,6 +50,7 @@
         condition: service_healthy
     environment:
       - NODE_ENV=development
+      - DOCKER_ENV=true
       - DATABASE_URL=postgresql://postgres@postgres-user:5432/user_service
       - KAFKA_BROKERS=kafka:9092
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -89,6 +90,7 @@
         condition: service_healthy
     environment:
       - NODE_ENV=development
+      - DOCKER_ENV=true
       - DATABASE_URL=postgresql://postgres@postgres-post:5432/post_service
       - USER_SERVICE_URL=http://user-service:3001
       - KAFKA_BROKERS=kafka:9092

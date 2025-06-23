@@ -1,21 +1,31 @@
 module.exports = {
   apps: [
     {
+      name: 'consul',
+      script: 'consul',
+      args: 'agent -dev -ui -client=0.0.0.0',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development'
+      },
+      log_file: './logs/consul.log',
+      out_file: './logs/consul-out.log',
+      error_file: './logs/consul-error.log',
+      time: true
+    },
+    {
       name: 'api-gateway',
       script: './api-gateway/server.js',
       cwd: './api-gateway',
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',      env: {
-        NODE_ENV: 'development',
-        PORT: 8080,
-        USER_SERVICE_URL: 'http://localhost:3001',
-        POST_SERVICE_URL: 'http://localhost:3002',
-        FEED_SERVICE_URL: 'http://localhost:3003',
-        CONSUL_HOST: 'localhost',
-        CONSUL_PORT: 8500,
-        SERVICE_ADDRESS: 'localhost'
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development'
       },
       log_file: './logs/api-gateway.log',
       out_file: './logs/api-gateway-out.log',
@@ -29,14 +39,9 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',      env: {
-        NODE_ENV: 'development',
-        PORT: 3001,
-        DATABASE_URL: 'postgresql://postgres@localhost:5432/user_service',
-        CONSUL_HOST: 'localhost',
-        CONSUL_PORT: 8500,
-        KAFKA_BROKERS: 'localhost:29092',
-        SERVICE_ADDRESS: 'localhost'
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development'
       },
       log_file: './logs/user-service.log',
       out_file: './logs/user-service-out.log',
@@ -50,14 +55,9 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',      env: {
-        NODE_ENV: 'development',
-        PORT: 3002,
-        DATABASE_URL: 'postgresql://postgres@localhost:5433/post_service',
-        CONSUL_HOST: 'localhost',
-        CONSUL_PORT: 8500,
-        KAFKA_BROKERS: 'localhost:29092',
-        SERVICE_ADDRESS: 'localhost'
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development'
       },
       log_file: './logs/post-service.log',
       out_file: './logs/post-service-out.log',
@@ -71,15 +71,9 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',      env: {
-        NODE_ENV: 'development',
-        PORT: 3003,
-        REDIS_URL: 'redis://localhost:6379',
-        USER_SERVICE_URL: 'http://localhost:3001',
-        POST_SERVICE_URL: 'http://localhost:3002',
-        CONSUL_HOST: 'localhost',
-        CONSUL_PORT: 8500,
-        SERVICE_ADDRESS: 'localhost'
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development'
       },
       log_file: './logs/feed-service.log',
       out_file: './logs/feed-service-out.log',
@@ -96,9 +90,7 @@ module.exports = {
       watch: false,
       max_memory_restart: '2G',
       env: {
-        NODE_ENV: 'development',
-        PORT: 3000,
-        NEXT_PUBLIC_API_URL: 'http://localhost:8080'
+        NODE_ENV: 'development'
       },
       log_file: './logs/frontend-dev.log',
       out_file: './logs/frontend-dev-out.log',

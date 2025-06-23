@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ConsulServiceRegistry } from './consulService';
-
+require('dotenv').config();
 export interface Post {
   id: string;
   author_id: string;

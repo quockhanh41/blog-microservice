@@ -3,6 +3,7 @@ import { json } from 'body-parser';
 import cors from 'cors';
 import feedRoutes from './routes';
 import { ConsulServiceRegistry } from './services/consulService';
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3003;

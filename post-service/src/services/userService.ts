@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { User } from '../types';
 import { ConsulServiceRegistry } from './consulService';
-
+require('dotenv').config();
 export class UserServiceClient {
   private baseUrl: string;
   private consulRegistry?: ConsulServiceRegistry;

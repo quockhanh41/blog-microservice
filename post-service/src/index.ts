@@ -6,6 +6,7 @@ import postRoutes from './routes';
 import { PostService } from './services/postService';
 import { KafkaService } from './services/kafkaService';
 import { ConsulServiceRegistry } from './services/consulService';
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3002;

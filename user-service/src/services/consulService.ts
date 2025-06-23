@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+require('dotenv').config();
 export interface ServiceInfo {
   id: string;
   name: string;

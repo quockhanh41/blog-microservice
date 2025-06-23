@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-
+require('dotenv').config(); // Load environment variables from .env file
 export class RedisService {
   private redis: Redis;
   private readonly TTL = 60 * 5; // 5 minutes cache expiry

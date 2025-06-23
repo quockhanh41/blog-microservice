@@ -1,6 +1,7 @@
 import { Kafka, Consumer, KafkaMessage } from 'kafkajs';
 import { UserUpdatedEvent } from '../types';
 import { PostService } from './postService';
+require('dotenv').config();
 
 export class KafkaService {
   private kafka: Kafka;
@@ -11,21 +12,31 @@ export class KafkaService {
   constructor(postService: PostService) {
     // Automatically detect environment and use appropriate Kafka brokers
     let brokers: string;
+    let saslOptions = undefined;
     
-    if (process.env.NODE_ENV === 'development' && !process.env.DOCKER_ENV) {
-      // Running locally outside Docker
-      brokers = process.env.KAFKA_BROKERS || 'localhost:29092';
-    } else {
-      // Running inside Docker or production
+    if (process.env.DOCKER_ENV) {
+      // Running inside Docker
       brokers = process.env.KAFKA_BROKERS || 'kafka:9092';
+    } else {
+      // Running locally outside Docker or using Confluent Cloud in production
+      brokers = process.env.CONFLUENT_BOOTSTRAP_SERVER || process.env.KAFKA_BROKERS || 'localhost:9092';
+      
+      // Configure SASL authentication for Confluent Cloud if API keys are available
+      if (process.env.CONFLUENT_API_KEY && process.env.CONFLUENT_API_SECRET) {
+        saslOptions = {
+          mechanism: 'plain',
+          username: process.env.CONFLUENT_API_KEY,
+          password: process.env.CONFLUENT_API_SECRET
+        };
+      }
     }
     
     console.log('Kafka brokers:', brokers);
     console.log('Node environment:', process.env.NODE_ENV);
     console.log('Docker environment:', process.env.DOCKER_ENV);
     
-    this.kafka = new Kafka({
-      clientId: 'post-service',
+    const kafkaConfig: any = {
+      clientId: process.env.KAFKA_CLIENT_ID || 'post-service',
       brokers: brokers.split(','),
       connectionTimeout: 10000, // 10 seconds
       requestTimeout: 30000, // 30 seconds
@@ -33,10 +44,18 @@ export class KafkaService {
         initialRetryTime: 1000,
         retries: 3
       }
-    });
+    };
+
+    // Add SASL authentication if configured (for Confluent Cloud)
+    if (saslOptions) {
+      kafkaConfig.ssl = true;
+      kafkaConfig.sasl = saslOptions;
+    }
+
+    this.kafka = new Kafka(kafkaConfig);
     
     this.consumer = this.kafka.consumer({ 
-      groupId: 'post-service-group',
+      groupId: process.env.KAFKA_GROUP_ID || 'post-service-group',
       sessionTimeout: 30000,
       heartbeatInterval: 3000
     });

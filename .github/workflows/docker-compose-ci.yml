@@ -1,0 +1,67 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ main, master, develop, feature/* ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create .env file
+        run: |
+          echo "ENV=development" > .env
+          echo "JWT_SECRET=test-secret-for-ci" >> .env
+          # Add other environment variables as needed
+
+      - name: Start infrastructure services
+        run: docker-compose -f docker-compose.infrastructure.yml up -d
+
+      - name: Build and start services
+        run: docker-compose build && docker-compose up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for services to start..."
+          sleep 30
+          docker-compose ps
+
+      - name: Check service health
+        run: |
+          docker-compose exec -T api-gateway curl -f http://localhost:8081/health || exit 1
+          docker-compose exec -T user-service curl -f http://localhost:3001/health || exit 1
+          docker-compose exec -T post-service curl -f http://localhost:3002/health || exit 1
+          docker-compose exec -T feed-service curl -f http://localhost:3003/health || exit 1
+
+      - name: Run integration tests
+        run: |
+          # Add integration tests commands here
+          echo "Running integration tests..."
+          # For example:
+          # docker-compose exec -T user-service npm run test:integration
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          mkdir -p ./logs
+          docker-compose logs > ./logs/docker-compose.log
+
+      - name: Upload logs as artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: service-logs
+          path: ./logs
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v

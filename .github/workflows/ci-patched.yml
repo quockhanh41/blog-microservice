@@ -68,11 +68,8 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ matrix.service }}
-          if [ "${{ matrix.service }}" = "feed-service" ]; then
             npm install
-          else
-            npm ci
-          fi
+
       
       - name: Generate Prisma client
         if: matrix.service == 'user-service' || matrix.service == 'post-service'

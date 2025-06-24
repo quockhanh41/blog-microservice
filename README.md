@@ -77,9 +77,36 @@ The system implements the following microservices patterns and techniques:
 git clone https://github.com/quockhanh41/blog-microservice.git
 cd blog-microservices
 
-# Start all services (infrastructure + microservices)
+# Start all services in development mode (default)
 docker-compose up -d
+
+# Start all services in production mode
+ENV=production docker-compose up -d
+
+# Rebuild containers if needed
+docker-compose up -d --build
 ```
+
+### 🔄 Switching Between Development and Production
+
+You can switch between development and production environments using the `ENV` environment variable:
+
+```bash
+# For development (default mode with hot-reloading)
+docker-compose up -d
+
+# For production (optimized, smaller images)
+ENV=production docker-compose up -d
+
+# To stop all services
+docker-compose down
+```
+
+**Note:** The production mode uses optimized Docker images with:
+- Smaller image size (only production dependencies)
+- Pre-compiled TypeScript code
+- Improved security and performance
+- No development tools or hot-reloading
 
 ### 🔌 Service Endpoints
 

@@ -16,7 +16,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3001      - key: DATABASE_URL
+        value: 3001      
+      - key: DATABASE_URL
         sync: false # Use the PostgreSQL connection string from Render dashboard
       - key: SERVICE_ADDRESS
         value: user-service
@@ -51,7 +52,8 @@ services:
       - key: DATABASE_URL
         sync: false # Use the PostgreSQL connection string from Render dashboard
       - key: USER_SERVICE_URL
-        value: https://user-service.onrender.com      - key: SERVICE_ADDRESS
+        value: https://user-service.onrender.com      
+      - key: SERVICE_ADDRESS
         value: post-service
       - key: KAFKA_BROKERS
         sync: false # Use Confluent Cloud or other Kafka service URL

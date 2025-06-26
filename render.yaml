@@ -10,7 +10,7 @@ services:
     branch: main
     rootDir: user-service
     buildCommand: npm install && npm run prisma:generate && npm run build
-    startCommand: node dist/index.js
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -42,7 +42,7 @@ services:
     branch: main
     rootDir: post-service
     buildCommand: npm install && npm run prisma:generate && npm run build
-    startCommand: node dist/index.js
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -74,7 +74,7 @@ services:
     branch: main
     rootDir: feed-service
     buildCommand: npm install && npm run build
-    startCommand: node dist/index.js
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV

@@ -4,7 +4,7 @@ services:
   api-gateway:
     build: 
       context: ./api-gateway
-      dockerfile: Dockerfile.improved
+      dockerfile: Dockerfile
       target: ${ENV:-development}
     container_name: blog-api-gateway
     ports:
@@ -38,7 +38,7 @@ services:
   user-service:
     build: 
       context: ./user-service
-      dockerfile: Dockerfile.improved
+      dockerfile: Dockerfile
       target: ${ENV:-development}
     ports:
       - "3001-3010:3001"
@@ -76,7 +76,7 @@ services:
   post-service:
     build: 
       context: ./post-service
-      dockerfile: Dockerfile.improved
+      dockerfile: Dockerfile
       target: ${ENV:-development}
     ports:
       - "3002-3020:3002"
@@ -118,7 +118,7 @@ services:
   feed-service:
     build: 
       context: ./feed-service
-      dockerfile: Dockerfile.improved
+      dockerfile: Dockerfile
       target: ${ENV:-development}
     ports:
       - "3003-3030:3003"
@@ -157,7 +157,7 @@ services:
   frontend:
     build: 
       context: ./Frontend
-      dockerfile: Dockerfile.improved
+      dockerfile: Dockerfile
       target: ${ENV:-development}
     container_name: blog-frontend
     ports:

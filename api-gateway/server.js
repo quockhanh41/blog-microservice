@@ -40,12 +40,34 @@ if (morgan) {
   healthApp.use(morgan("combined"));
 }
 
+// Get CORS configuration from environment variables
+const corsOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+  : ["http://localhost:3000", "http://localhost:6060"];
+
+const corsCredentials = process.env.CORS_CREDENTIALS === 'true' || true;
+
+const corsAllowedHeaders = process.env.CORS_ALLOWED_HEADERS
+  ? process.env.CORS_ALLOWED_HEADERS.split(',').map(header => header.trim())
+  : ["Content-Type", "Authorization", "x-user-id"];
+
+const corsAllowedMethods = process.env.CORS_ALLOWED_METHODS
+  ? process.env.CORS_ALLOWED_METHODS.split(',').map(method => method.trim())
+  : ["GET", "POST", "PUT", "DELETE", "OPTIONS"];
+
+// Log CORS configuration
+console.log("🔧 CORS Configuration:");
+console.log("   Origins:", corsOrigins);
+console.log("   Credentials:", corsCredentials);
+console.log("   Headers:", corsAllowedHeaders);
+console.log("   Methods:", corsAllowedMethods);
+
 // Enable CORS for health check endpoint
 healthApp.use(
   cors({
-    origin: ["http://localhost:6060", "http://localhost:3000"],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
+    origin: corsOrigins,
+    credentials: corsCredentials,
+    allowedHeaders: corsAllowedHeaders,
   })
 );
 
@@ -95,10 +117,10 @@ const GATEWAY_PORT = 8080;
 // Configure CORS for the main gateway
 app.use(
   cors({
-    origin: ["http://localhost:6060", "http://localhost:3000"],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: corsOrigins,
+    credentials: corsCredentials,
+    allowedHeaders: corsAllowedHeaders,
+    methods: corsAllowedMethods,
   })
 );
 
@@ -225,6 +247,25 @@ app.post("/admin/cache/clear/:service", (req, res) => {
   res.json({
     message: `Cache cleared for ${serviceName}`,
     timestamp: new Date().toISOString(),
+  });
+});
+
+// CORS configuration endpoint
+app.get("/admin/cors", (req, res) => {
+  res.json({
+    timestamp: new Date().toISOString(),
+    cors: {
+      origins: corsOrigins,
+      credentials: corsCredentials,
+      allowedHeaders: corsAllowedHeaders,
+      allowedMethods: corsAllowedMethods,
+    },
+    environment: {
+      CORS_ORIGINS: process.env.CORS_ORIGINS,
+      CORS_CREDENTIALS: process.env.CORS_CREDENTIALS,
+      CORS_ALLOWED_HEADERS: process.env.CORS_ALLOWED_HEADERS,
+      CORS_ALLOWED_METHODS: process.env.CORS_ALLOWED_METHODS,
+    }
   });
 });
 

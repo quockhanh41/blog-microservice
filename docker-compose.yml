@@ -159,6 +159,9 @@ services:
       context: ./Frontend
       dockerfile: Dockerfile
       target: ${ENV:-development}
+      args:
+        NODE_ENV: ${ENV:-development}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     container_name: blog-frontend
     ports:
       - "3000:3000"
@@ -171,7 +174,7 @@ services:
       - api-gateway
     environment:
       - NODE_ENV=${ENV:-development}
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
       - CHOKIDAR_USEPOLLING=true
     restart: unless-stopped
     networks:
@@ -240,7 +243,7 @@ services:
     restart: unless-stopped
 
   consul:
-    image: consul:1.15
+    image: hashicorp/consul:latest
     container_name: blog-consul
     ports:
       - "8500:8500"

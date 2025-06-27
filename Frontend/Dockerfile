@@ -49,9 +49,14 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Set environment variables directly for build
-ENV NEXT_PUBLIC_API_URL="https://api-gateway-production-db6a.up.railway.app"
-ENV NEXT_PUBLIC_AUTH_ENABLED="true"
-ENV NODE_ENV="production"
+ARG NEXT_PUBLIC_API_URL="https://api-gateway-production-db6a.up.railway.app"
+ARG NEXT_PUBLIC_AUTH_ENABLED="true"
+ARG NODE_ENV="production"
+
+# Set environment variables from build args
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_AUTH_ENABLED=$NEXT_PUBLIC_AUTH_ENABLED
+ENV NODE_ENV=$NODE_ENV
 
 # Build the application
 RUN pnpm run build

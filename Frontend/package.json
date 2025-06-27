@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p ${PORT:-3000}",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "build:standalone": "cross-env NEXT_CONFIG=production next build",
     "start": "node .next/standalone/server.js",
-    "start:legacy": "next start -p ${PORT:-3000}",
+    "start:legacy": "next start -p 3000",
     "lint": "next lint"
   },
   "dependencies": {

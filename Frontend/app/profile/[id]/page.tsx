@@ -8,7 +8,7 @@ import UserCard from "@/components/UserCard"
 import PostCard from "@/components/PostCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/AuthContext"
-
+require("dotenv").config()
 interface User {
   id: string
   username: string
@@ -130,12 +130,14 @@ export default function ProfilePage() {
     }
   }, [params.id])
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
   const fetchUserProfile = async (isMounted = true) => {
     try {
       const token = localStorage.getItem("token")
       console.log('Fetching user profile with token:', token ? 'Token exists' : 'No token')
-      
-      const response = await fetch(`http://localhost:8080/users/profile`, {
+
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -163,7 +165,7 @@ export default function ProfilePage() {
   const fetchUserPosts = async (isMounted = true) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8080/posts/posts/user/${params.id}`, {
+      const response = await fetch(`${API_BASE_URL}/posts/posts/user/${params.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -213,7 +215,7 @@ export default function ProfilePage() {
   const fetchAllUsers = async (isMounted = true) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8080/users/users`, {
+      const response = await fetch(`${API_BASE_URL}/users/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -238,8 +240,8 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem("token")
       if (!currentUser?.id) return
-      
-      const response = await fetch(`http://localhost:8080/users/users/${currentUser.id}/following`, {
+
+      const response = await fetch(`${API_BASE_URL}/users/users/${currentUser.id}/following`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -272,7 +274,7 @@ export default function ProfilePage() {
       
       if (isCurrentlyFollowing) {
         // Unfollow
-        const response = await fetch(`http://localhost:8080/users/users/${currentUser.id}/unfollow`, {
+        const response = await fetch(`${API_BASE_URL}/users/users/${currentUser.id}/unfollow`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -289,7 +291,7 @@ export default function ProfilePage() {
         }
       } else {
         // Follow
-        const response = await fetch(`http://localhost:8080/users/users/${currentUser.id}/follow`, {
+        const response = await fetch(`${API_BASE_URL}/users/users/${currentUser.id}/follow`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

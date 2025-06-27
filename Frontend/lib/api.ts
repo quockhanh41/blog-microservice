@@ -1,7 +1,15 @@
 import { toast } from "@/hooks/use-toast";
+require("dotenv").config();
 
 // Base URL for the API Gateway
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+// Log the API URL for debugging
+console.log("🔧 Environment Info:");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("NEXT_PUBLIC_API_URL from env:", process.env.NEXT_PUBLIC_API_URL);
+console.log("Final API_BASE_URL:", API_BASE_URL);
+console.log("===================");
 
 // Helper function to get the auth token
 const getToken = (): string | null => {
@@ -35,6 +43,15 @@ const apiRequest = async <T>(
 ): Promise<T> => {
   const token = getToken();
   const userId = getUserId();
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  
+  // Log API request details
+  console.log("🌐 API Request:");
+  console.log("Full URL:", fullUrl);
+  console.log("Endpoint:", endpoint);
+  console.log("Method:", options.method || "GET");
+  console.log("Has token:", !!token);
+  
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -43,13 +60,18 @@ const apiRequest = async <T>(
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(fullUrl, {
       ...options,
       headers,
     });
+    
+    console.log("Response status:", response.status);
+    console.log("Response OK:", response.ok);
+    
     return await handleResponse(response);
   } catch (error) {
     console.error(`API Error (${endpoint}):`, error);
+    console.error("Full URL that failed:", fullUrl);
     if (error instanceof Error) {
       toast({
         title: "Lỗi",

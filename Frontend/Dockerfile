@@ -16,10 +16,6 @@ RUN pnpm install
 # Copy application code
 COPY . .
 
-# Disable telemetry
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=development
-
 # Expose port
 EXPOSE 3000
 
@@ -52,8 +48,10 @@ RUN pnpm install --frozen-lockfile
 # Copy application code
 COPY . .
 
-# Disable telemetry
-ENV NEXT_TELEMETRY_DISABLED=1
+# Set environment variables directly for build
+ENV NEXT_PUBLIC_API_URL="https://api-gateway-production-db6a.up.railway.app"
+ENV NEXT_PUBLIC_AUTH_ENABLED="true"
+ENV NODE_ENV="production"
 
 # Build the application
 RUN pnpm run build
@@ -63,8 +61,6 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
@@ -90,6 +86,11 @@ EXPOSE 3000
 # Set hostname to make the server accessible outside the container
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
+
+# Set production environment variables (runtime)
+ENV NEXT_PUBLIC_API_URL="https://api-gateway-production-db6a.up.railway.app"
+ENV NEXT_PUBLIC_AUTH_ENABLED="true"
+ENV NODE_ENV="production"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
